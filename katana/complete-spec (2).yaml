@@ -1,0 +1,577 @@
+swagger: '2.0'
+host: nite-api.sumologic.net
+basePath: /api/v1beta
+schemes:
+ - https
+info:
+  description: The Sumo Logic API can be used to interact with the Sumo Logic platform.
+  version: v1beta
+  title: Sumo Logic API
+  contact:
+    email: api@sumologic.com
+
+
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+
+
+securityDefinitions:
+  basicAuth:
+    type: basic
+
+
+security:
+  - basicAuth: []
+
+
+tags:
+- name: roleManagement
+  description: Role Management API
+- name: userManagement
+  description: User Management API.
+
+
+paths:
+  /roles/:
+    get:
+      summary: Get a list of roles.
+      description: >
+        Get a list of all the roles in the organization. The response is
+        paginated with a default limit of 100 roles per page.
+      operationId: listRoles
+      tags:
+        - roleManagement
+      produces:
+        - application/json
+      parameters:
+        - name: limit
+          description: >
+            Limit the number of roles returned in the response. The number of
+            roles returned may be less than the `limit`.
+          required: false
+          in: query
+          type: integer
+          format: int32
+          default: 100
+          minimum: 1
+          maximum: 1000
+        - name: token
+          description: >
+            Continuation token to get the next page of results. A page object
+            with the next continuation token is returned in the response body.
+            Subsequent GET requests should specify the continuation token to get
+            the next page of results.
+          required: false
+          in: query
+          type: string
+      responses:
+        '200':
+          description: A paginated list of roles in the organization.
+          schema:
+            $ref: '#/definitions/ListRolesResponse'
+        default:
+          description: Operation failed with an error.
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+            
+    post:
+      summary: Create a new role.
+      description: Create a new role in the organization.
+      operationId: createRole
+      tags:
+        - roleManagement
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: roleDefinition
+          description: Information about the new role.
+          required: true
+          in: body
+          schema:
+            $ref: '#/definitions/RoleDefinition'
+      responses:
+        '200':
+          description: The role has been created.
+          schema:
+            $ref: '#/definitions/Role'
+        default:
+          description: Operation failed with an error.
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+
+
+  /roles/{id}:
+    get:
+      summary: Get a role.
+      description: Get a role with the given identifier in the organization.
+      operationId: getRole
+      tags:
+        - roleManagement
+      produces:
+        - application/json
+      parameters:
+        - name: id
+          description: Identifier of the role to fetch.
+          required: true
+          in: path
+          type: string
+      responses:
+        '200':
+          description: Role object that was requested.
+          schema:
+            $ref: '#/definitions/Role'
+        default:
+          description: Operation failed with an error.
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+
+
+    put:
+      summary: Update a role.
+      description: >
+        Update an existing role in the organization. All properties specified in
+        the request are replaced. Missing properties are set to their default values.
+      operationId: updateRole
+      tags:
+        - roleManagement
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: id
+          description: Identifier of the role to update.
+          required: true
+          in: path
+          type: string
+        - name: roleDefinition
+          description: Information to update about the role.
+          required: true
+          in: body
+          schema:
+            $ref: '#/definitions/RoleDefinition'
+      responses:
+        '200':
+          description: The user was successfully modified.
+          schema:
+            $ref: '#/definitions/Role'
+        default:
+          description: Operation failed with an error.
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+
+
+    delete:
+      summary: Delete a role.
+      description: Delete a role with the given identifier from the organization.
+      operationId: deleteRole
+      tags:
+        - roleManagement
+      produces:
+        - application/json
+      parameters:
+        - name: id
+          description: Identifier of the role to delete.
+          required: true
+          in: path
+          type: string
+      responses:
+        '204':
+          description: Role was deleted successfully.
+        default:
+          description: Operation failed with an error.
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+            
+  /users/:
+    get:
+      summary: Get a list of users.
+      description: >
+        Get a list of all users in the organization. The response is paginated
+        with a default limit of 100 users per page.
+      operationId: listUsers
+      tags:
+        - userManagement
+      produces:
+        - application/json
+      parameters:
+        - name: limit
+          description: >
+            Limit the number of users returned in the response. The number of
+            users returned may be less than the `limit`.
+          required: false
+          in: query
+          type: integer
+          format: int32
+          default: 100
+          minimum: 1
+          maximum: 1000
+        - name: token
+          description: >
+            Continuation token to get the next page of results. A page object
+            with the next continuation token is returned
+
+
+            in the response body. Subsequent GET requests should specify the
+            continuation token to get the next page of results.
+          required: false
+          in: query
+          type: string
+      responses:
+        '200':
+          description: A paginated list of users in the organization.
+          schema:
+            $ref: '#/definitions/ListUsersResponse'
+        default:
+          description: Operation failed with an error.
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+
+
+    post:
+      summary: Create a new user.
+      description: Create a new user in the organization.
+      operationId: createUser
+      tags:
+        - userManagement
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: userDefinition
+          description: Information about the new user.
+          required: true
+          in: body
+          schema:
+            $ref: '#/definitions/UserDefinition'
+      responses:
+        '200':
+          description: The user has been created.
+          schema:
+            $ref: '#/definitions/User'
+        default:
+          description: Operation failed with an error.
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+
+
+  /users/{id}:
+    get:
+      summary: Get a user.
+      description: Get a user with the given identifier from the organization.
+      operationId: getUser
+      tags:
+        - userManagement
+      produces:
+        - application/json
+      parameters:
+        - name: id
+          description: Identifier of user to return.
+          required: true
+          in: path
+          type: string
+      responses:
+        '200':
+          description: User object that was requested.
+          schema:
+            $ref: '#/definitions/User'
+        default:
+          description: Operation failed with an error.
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+
+
+    put:
+      summary: Update a user.
+      description: >
+        Update an existing user in the organization. All properties specified in
+        the request are replaced. Missing
+
+
+        properties are set to their default values.
+      operationId: updateUser
+      tags:
+        - userManagement
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: id
+          description: Identifier of the user to update.
+          required: true
+          in: path
+          type: string
+        - name: userDefinition
+          description: Information to update about the user.
+          required: true
+          in: body
+          schema:
+            $ref: '#/definitions/UserDefinition'
+      responses:
+        '200':
+          description: The user was successfully modified.
+          schema:
+            $ref: '#/definitions/User'
+        default:
+          description: Operation failed with an error.
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+
+
+    delete:
+      summary: Delete a user.
+      description: >-
+        Delete a user with the given identifier from the organization and
+        transfer their content to the user with identifier specified in
+        "transferTo". If "transferTo" is not specified, the contents are also
+        deleted.
+      operationId: deleteUser
+      tags:
+        - userManagement
+      parameters:
+        - name: id
+          description: Identifier of the user to delete.
+          required: true
+          in: path
+          type: string
+        - name: transferTo
+          description: Identifier of the user to transfer the content of deleted user.
+          required: false
+          in: query
+          type: string
+      responses:
+        '204':
+          description: User was deleted successfully.
+        default:
+          description: Operation failed with an error.
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+            
+
+
+definitions:
+  RoleDefinition:
+    type: object
+    required:
+      - name
+    properties:
+      name:
+        description: Name of the role.
+        type: string
+        example: Admin
+        minLength: 1
+        maxLength: 128
+      description:
+        description: Description of the role.
+        type: string
+        example: Manage users and content.
+        minLength: 0
+        maxLength: 255
+      filterPredicate:
+        description: >
+          A search filter to restrict access to specific logs. The filter is
+          silently added to the beginning of each query a user runs. 
+          For example, using '!_sourceCategory=billing' as a filter
+          predicate will prevent users assigned to the role from viewing
+          logs from the source category named 'billing'.
+        type: string
+        example: '!_sourceCategory=billing'
+      users:
+        description: List of user identifiers to assign the role to.
+        type: array
+        items:
+          type: string
+      capabilities:
+        description: |
+          List of capabilities associated with this role. Valid values are
+            ### Anomaly Reports
+            - manageAnomalyReport
+            - viewAnomalyReport
+            ### Connections
+            - manageConnections
+            ### Collectors
+            - manageCollectors
+            - viewCollectors
+            ### Dashboards
+            - shareDashboardWhitelist
+            - shareDashboardWorld
+            ### Data Management
+            - manageContent
+            - manageDataVolumeFeed
+            - manageFieldExtractionRules
+            - manageIndexes
+            - manageS3DataForwarding
+            ### Metrics
+            - manageMonitors
+            - metricsExtraction
+            ### Security
+            - ipWhitelisting
+            - manageAccessKeys
+            - manageAuditDataFeed
+            - managePasswordPolicy
+            - manageSaml
+            - manageSupportAccountAccess
+            - manageUsersAndRoles
+            - shareDashboardOutsideOrg
+        type: array
+        items:
+          type: string
+  Role:
+    type: object
+    allOf:
+      - required:
+          - id
+        properties:
+          id:
+            description: Unique identifier for the role.
+            type: string
+          systemDefined:
+            description: Role is system or user defined.
+            type: boolean
+      - $ref: '#/definitions/RoleDefinition'
+      - type: object
+        required:
+          - createdAt
+          - createdBy
+          - modifiedAt
+          - modifiedBy
+        properties:
+          createdAt:
+            description: >
+              Creation timestamp in UTC in
+              [RFC3339](https://tools.ietf.org/html/rfc3339) format.
+            type: string
+            format: dateTime
+          createdBy:
+            description: Identifier of the user who created the resource.
+            type: string
+          modifiedAt:
+            description: Last modification timestamp in UTC.
+            type: string
+            format: dateTime
+          modifiedBy:
+            description: Identifier of the user who last modified the resource.
+            type: string
+  ListRolesResponse:
+    type: object
+    required:
+      - data
+    properties:
+      data:
+        description: List of roles.
+        type: array
+        items:
+          $ref: '#/definitions/Role'
+      next:
+        description: Next continuation token.
+        type: string
+        
+  UserDefinition:
+    type: object
+    required:
+      - firstName
+      - lastName
+      - email
+      - roleIds
+    properties:
+      firstName:
+        description: First name of the user.
+        type: string
+        example: John
+        minLength: 1
+        maxLength: 128
+      lastName:
+        description: Last name of the user.
+        type: string
+        example: Doe
+        minLength: 0
+        maxLength: 128
+      email:
+        description: Email address of the user.
+        type: string
+        format: email
+        example: johndoe@acme.com
+        maxLength: 255
+      roleIds:
+        description: List of roleIds associated with the user.
+        type: array
+        items:
+          type: string
+  User:
+    type: object
+    allOf:
+      - required:
+          - id
+        properties:
+          id:
+            description: Unique identifier for the user.
+            type: string
+      - $ref: '#/definitions/UserDefinition'
+  ListUsersResponse:
+    type: object
+    required:
+      - data
+    properties:
+      data:
+        description: List of users.
+        type: array
+        items:
+          $ref: '#/definitions/User'
+      next:
+        description: Next continuation token.
+        type: string
+        
+  ErrorDescription:
+    type: object
+    required:
+      - code
+      - message
+      # Not required:
+      # - detail
+      # - meta
+    properties:
+      code:
+        type: string
+        description: An error code describing the type of error.
+        example: 'auth:password_too_short'
+      message:
+        type: string
+        description: A short English-language description of the error.
+        example: 'Your password was too short.'
+      detail:
+        type: string
+        description: An optional fuller English-language description of the error.
+        example: 'Your password was 5 characters long, the minimum length is 12 characters. See http://example.com/password for more information.'
+      meta:
+        type: object
+        description: An optional list of metadata about the error.
+        example:
+          minLength: 12
+          actualLength: 5
+
+
+  ErrorResponse:
+    type: object
+    required:
+      - id
+      - errors
+    properties:
+      id:
+        type: string
+        description: An identifier for the error; this is unique to the specific API request.
+        example: 'IUUQI-DGH5I-TJ045'
+      errors:
+        type: array
+        items:
+          $ref: '#/definitions/ErrorDescription'
+        description: A list of one or more causes of the error.
+        example:
+          - code: 'auth:password_too_short'
+            message: 'Your password was too short.'
+          - code: 'auth:password_character_classes'
+            message: 'Your password did not contain any non-alphanumeric characters'

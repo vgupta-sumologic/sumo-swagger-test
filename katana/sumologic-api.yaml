@@ -1,0 +1,721 @@
+---
+swagger: "2.0"
+info:
+  description: "Welcome to the Sumo Logic API. You can use these API to interact with\
+    \ Sumo Logic platform.\n\nYou can also look at [other APIs](https://help.sumologic.com/APIs)\
+    \ for more information about some other API endpoints.\n# Authentication\nSumo\
+    \ Logic supports the following options for API authentication:\n* Access ID and\
+    \ access key\n* Base64 encoded access id and access key\n\nSee [Access Keys](https://help.sumologic.com/Manage/Security/Access-Keys)\
+    \ to generate an access key. Make sure to copy the key you create, because it\
+    \ is displayed only once.\nWhen you have an accessId and accessKey you can execute\
+    \ requests such as the following:\n\n``` curl -u \"<accessId>:<accessKey>\" -X\
+    \ GET https://api.YOUR_DEPLOYMENT.sumologic.com/api/v1/users/{id} ```\n\nIf you\
+    \ prefer to use basic access authentication, you can do a Base64 encoding of your\
+    \ `<accessId>:<accessKey>` to authenticate your HTTPS request.\nThe following\
+    \ is an example request, replace the placeholder `<encoded>` with your encoded\
+    \ access id and access key string:\n\n``` curl -H \"Authorization: Basic <encoded>\"\
+    \ -X GET https://api.YOUR_DEPLOYMENT.sumologic.com/api/v1/users/{id} ```\n\nRefer\
+    \ to [API Authentication](https://help.sumologic.com/APIs/General-API-Information/API-Authentication)\
+    \ for more information about authentication.\n# Generating Clients\nInformation\
+    \ about how you can generate clients.\n"
+  version: "1.0.0 Beta"
+  title: "Sumo Logic API"
+  contact:
+    email: "api@sumologic.com"
+  license:
+    name: "Apache 2.0"
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+  x-logo:
+    url: "./sumologic_logo.png"
+basePath: "/api"
+tags:
+- name: "roleManagement"
+  description: "Role management API."
+- name: "userManagement"
+  description: "User management API."
+schemes:
+- "https"
+security:
+- basicAuth: []
+paths:
+  /v1beta/roles:
+    get:
+      tags:
+      - "roleManagement"
+      summary: "Get a list of roles."
+      description: "Get a list of all the roles in the organization. The response\
+        \ is paginated with a default limit of 100 roles per page.\n"
+      operationId: "listRoles"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "limit"
+        in: "query"
+        description: "Limit the number of roles returned in the response. The number\
+          \ of roles returned may be less than the `limit`.\n"
+        required: false
+        type: "integer"
+        default: 100
+        maximum: 1000
+        minimum: 1
+        format: "int32"
+      - name: "token"
+        in: "query"
+        description: "Continuation token to get the next page of results. A page object\
+          \ with the next continuation token is returned in the response body. Subsequent\
+          \ GET requests should specify the continuation token to get the next page\
+          \ of results. `token` is set to null when no more pages are left.\n"
+        required: false
+        type: "string"
+      responses:
+        200:
+          description: "A paginated list of roles in the organization."
+          schema:
+            $ref: "#/definitions/ListRolesResponse"
+        default:
+          description: "Operation failed with an error."
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+    post:
+      tags:
+      - "roleManagement"
+      summary: "Create a new role."
+      description: "Create a new role in the organization."
+      operationId: "createRole"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "createRoleDefinition"
+        description: "Information about the new role."
+        required: true
+        schema:
+          $ref: "#/definitions/CreateRoleDefinition"
+      responses:
+        200:
+          description: "The role has been created."
+          schema:
+            $ref: "#/definitions/Role"
+        default:
+          description: "Operation failed with an error."
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /v1beta/roles/{id}:
+    get:
+      tags:
+      - "roleManagement"
+      summary: "Get a role."
+      description: "Get a role with the given identifier in the organization."
+      operationId: "getRole"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "Identifier of the role to fetch."
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "Role object that was requested."
+          schema:
+            $ref: "#/definitions/Role"
+        default:
+          description: "Operation failed with an error."
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+    put:
+      tags:
+      - "roleManagement"
+      summary: "Update a role."
+      description: "Update an existing role in the organization.\n"
+      operationId: "updateRole"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "Identifier of the role to update."
+        required: true
+        type: "string"
+      - in: "body"
+        name: "updateRoleDefinition"
+        description: "Information to update about the role."
+        required: true
+        schema:
+          $ref: "#/definitions/UpdateRoleDefinition"
+      responses:
+        200:
+          description: "The user was successfully modified."
+          schema:
+            $ref: "#/definitions/Role"
+        default:
+          description: "Operation failed with an error."
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+    delete:
+      tags:
+      - "roleManagement"
+      summary: "Delete a role."
+      description: "Delete a role with the given identifier from the organization."
+      operationId: "deleteRole"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "Identifier of the role to delete."
+        required: true
+        type: "string"
+      responses:
+        204:
+          description: "Role was deleted successfully."
+        default:
+          description: "Operation failed with an error."
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /v1beta/roles/{roleId}/users/{userId}:
+    put:
+      tags:
+      - "roleManagement"
+      summary: "Assign a role to a user."
+      description: "Assign a role to a user in the organization.\n"
+      operationId: "assignRoleToUser"
+      parameters:
+      - name: "roleId"
+        in: "path"
+        description: "Identifier of the role to assign."
+        required: true
+        type: "string"
+      - name: "userId"
+        in: "path"
+        description: "Identifier of the user to assign the role to."
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "Role was successfully assigned to the user."
+          schema:
+            $ref: "#/definitions/Role"
+        default:
+          description: "Operation failed with an error."
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+    delete:
+      tags:
+      - "roleManagement"
+      summary: "Remove role from a user."
+      description: "Remove a role from a user in the organization.\n"
+      operationId: "removeRoleFromUser"
+      parameters:
+      - name: "roleId"
+        in: "path"
+        description: "Identifier of the role to delete."
+        required: true
+        type: "string"
+      - name: "userId"
+        in: "path"
+        description: "Identifier of the user to remove the role from."
+        required: true
+        type: "string"
+      responses:
+        204:
+          description: "Role was successfully removed from the user."
+        default:
+          description: "Operation failed with an error."
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /v1beta/users:
+    get:
+      tags:
+      - "userManagement"
+      summary: "Get a list of users."
+      description: "Get a list of all users in the organization. The response is paginated\
+        \ with a default limit of 100 users per page.\n"
+      operationId: "listUsers"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "limit"
+        in: "query"
+        description: "Limit the number of users returned in the response. The number\
+          \ of users returned may be less than the `limit`.\n"
+        required: false
+        type: "integer"
+        default: 100
+        maximum: 1000
+        minimum: 1
+        format: "int32"
+      - name: "token"
+        in: "query"
+        description: "Continuation token to get the next page of results. A page object\
+          \ with the next continuation token is returned in the response body. Subsequent\
+          \ GET requests should specify the continuation token to get the next page\
+          \ of results. `token` is set to null when no more pages are left.\n"
+        required: false
+        type: "string"
+      responses:
+        200:
+          description: "A paginated list of users in the organization."
+          schema:
+            $ref: "#/definitions/ListUsersResponse"
+        default:
+          description: "Operation failed with an error."
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+    post:
+      tags:
+      - "userManagement"
+      summary: "Create a new user."
+      description: "Create a new user in the organization."
+      operationId: "createUser"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "createUserDefinition"
+        description: "Information about the new user."
+        required: true
+        schema:
+          $ref: "#/definitions/CreateUserDefinition"
+      responses:
+        200:
+          description: "The user has been created."
+          schema:
+            $ref: "#/definitions/User"
+        default:
+          description: "Operation failed with an error."
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /v1beta/users/{id}:
+    get:
+      tags:
+      - "userManagement"
+      summary: "Get a user."
+      description: "Get a user with the given identifier from the organization."
+      operationId: "getUser"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "Identifier of user to return."
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "User object that was requested."
+          schema:
+            $ref: "#/definitions/User"
+        default:
+          description: "Operation failed with an error."
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+    put:
+      tags:
+      - "userManagement"
+      summary: "Update a user."
+      description: "Update an existing user in the organization.\n"
+      operationId: "updateUser"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "Identifier of the user to update."
+        required: true
+        type: "string"
+      - in: "body"
+        name: "updateUserDefinition"
+        description: "Information to update about the user."
+        required: true
+        schema:
+          $ref: "#/definitions/UpdateUserDefinition"
+      responses:
+        200:
+          description: "The user was successfully modified."
+          schema:
+            $ref: "#/definitions/User"
+        default:
+          description: "Operation failed with an error."
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+    delete:
+      tags:
+      - "userManagement"
+      summary: "Delete a user."
+      description: "Delete a user with the given identifier from the organization\
+        \ and transfer their content to the user with identifier specified in \"transferTo\"\
+        . If \"transferTo\" is not specified, the contents are also deleted.\n"
+      operationId: "deleteUser"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "Identifier of the user to delete."
+        required: true
+        type: "string"
+      - name: "transferTo"
+        in: "query"
+        description: "Identifier of the user to transfer the content of deleted user."
+        required: false
+        type: "string"
+      responses:
+        204:
+          description: "User was deleted successfully."
+        default:
+          description: "Operation failed with an error."
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /v1beta/users/{id}/requestChangeEmail:
+    put:
+      tags:
+      - "userManagement"
+      summary: "Email change request"
+      description: "Request to change a user's email and send out a link to the new\
+        \ email"
+      operationId: "requestChangeEmail"
+      consumes:
+      - "application/json"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "Identifier of the user to change email."
+        required: true
+        type: "string"
+      - in: "body"
+        name: "changeEmailRequest"
+        description: "New email of the user."
+        required: true
+        schema:
+          $ref: "#/definitions/ChangeEmailRequest"
+      responses:
+        200:
+          description: "User's email was changed successfully."
+        default:
+          description: "Operation failed with an error."
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /v1beta/users/{id}/resetPassword:
+    put:
+      tags:
+      - "userManagement"
+      summary: "Reset password"
+      description: "Reset a user's password"
+      operationId: "resetPassword"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "Identifier of the user to reset password."
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "User's password was reset successfully."
+        default:
+          description: "Opration failed with an error."
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+securityDefinitions:
+  basicAuth:
+    type: "basic"
+definitions:
+  ListRolesResponse:
+    type: "object"
+    required:
+    - "data"
+    properties:
+      data:
+        type: "array"
+        description: "List of roles."
+        items:
+          $ref: "#/definitions/Role"
+      next:
+        type: "string"
+        description: "Next continuation token."
+  Role:
+    type: "object"
+    required:
+    - "id"
+    properties:
+      id:
+        type: "string"
+        description: "Unique identifier for the role."
+      systemDefined:
+        type: "boolean"
+        description: "Role is system or user defined."
+    $ref: "#/definitions/CreateRoleDefinition"
+    $ref: "#/definitions/Metadata"
+  ErrorResponse:
+    type: "object"
+    required:
+    - "errors"
+    - "id"
+    properties:
+      id:
+        type: "string"
+        example: "IUUQI-DGH5I-TJ045"
+        description: "An identifier for the error; this is unique to the specific\
+          \ API request."
+      errors:
+        type: "array"
+        example:
+        - code: "auth:password_too_short"
+          message: "Your password was too short."
+        - code: "auth:password_character_classes"
+          message: "Your password did not contain any non-alphanumeric characters"
+        description: "A list of one or more causes of the error."
+        items:
+          $ref: "#/definitions/ErrorDescription"
+  ErrorDescription:
+    type: "object"
+    required:
+    - "code"
+    - "message"
+    properties:
+      code:
+        type: "string"
+        example: "auth:password_too_short"
+        description: "An error code describing the type of error."
+      message:
+        type: "string"
+        example: "Your password was too short."
+        description: "A short English-language description of the error."
+      detail:
+        type: "string"
+        example: "Your password was 5 characters long, the minimum length is 12 characters.\
+          \  See http://example.com/password for more information."
+        description: "An optional fuller English-language description of the error."
+      meta:
+        type: "object"
+        example:
+          minLength: 12
+          actualLength: 5
+        description: "An optional list of metadata about the error."
+        properties: {}
+  CreateRoleDefinition:
+    type: "object"
+    required:
+    - "name"
+    properties:
+      name:
+        type: "string"
+        example: "Admin"
+        description: "Name of the role."
+        minLength: 1
+        maxLength: 128
+      description:
+        type: "string"
+        example: "Manage users and content."
+        description: "Description of the role."
+        minLength: 0
+        maxLength: 255
+      filterPredicate:
+        type: "string"
+        example: "!_sourceCategory=billing"
+        description: "A search filter to restrict access to specific logs. The filter\
+          \ is silently added to the beginning of each query a user runs. For example,\
+          \ using '!_sourceCategory=billing' as a filter predicate will prevent users\
+          \ assigned to the role from viewing logs from the source category named\
+          \ 'billing'.\n"
+      users:
+        type: "array"
+        description: "List of user identifiers to assign the role to."
+        items:
+          type: "string"
+      capabilities:
+        type: "array"
+        description: "List of [capabilities](https://help.sumologic.com/Manage/Users-and-Roles/Manage-Roles/Role-Capabilities)\
+          \ associated with this role. Valid values are\n  ### Anomaly Reports\n \
+          \ - manageAnomalyReport\n  - viewAnomalyReport\n  ### Connections\n  - manageConnections\n\
+          \  ### Collectors\n  - manageCollectors\n  - viewCollectors\n  ### Dashboards\n\
+          \  - shareDashboardWhitelist\n  - shareDashboardWorld\n  ### Data Management\n\
+          \  - manageContent\n  - manageDataVolumeFeed\n  - manageFieldExtractionRules\n\
+          \  - manageIndexes\n  - manageS3DataForwarding\n  ### Metrics\n  - manageMonitors\n\
+          \  - metricsExtraction\n  ### Security\n  - ipWhitelisting\n  - manageAccessKeys\n\
+          \  - manageAuditDataFeed\n  - managePasswordPolicy\n  - manageSaml\n  -\
+          \ manageSupportAccountAccess\n  - manageUsersAndRoles\n  - shareDashboardOutsideOrg\n"
+        items:
+          type: "string"
+  UpdateRoleDefinition:
+    type: "object"
+    required:
+    - "capabilities"
+    - "description"
+    - "filterPredicate"
+    - "name"
+    - "users"
+    properties:
+      name:
+        type: "string"
+        example: "Admin"
+        description: "Name of the role."
+        minLength: 1
+        maxLength: 128
+      description:
+        type: "string"
+        example: "Manage users and content."
+        description: "Description of the role."
+        minLength: 0
+        maxLength: 255
+      filterPredicate:
+        type: "string"
+        example: "!_sourceCategory=billing"
+        description: "A search filter to restrict access to specific logs. The filter\
+          \ is silently added to the beginning of each query a user runs. For example,\
+          \ using '!_sourceCategory=billing' as a filter predicate will prevent users\
+          \ assigned to the role from viewing logs from the source category named\
+          \ 'billing'.\n"
+      users:
+        type: "array"
+        description: "List of user identifiers to assign the role to."
+        items:
+          type: "string"
+      capabilities:
+        type: "array"
+        description: "List of [capabilities](https://help.sumologic.com/Manage/Users-and-Roles/Manage-Roles/Role-Capabilities)\
+          \ associated with this role. Valid values are\n  ### Anomaly Reports\n \
+          \ - manageAnomalyReport\n  - viewAnomalyReport\n  ### Connections\n  - manageConnections\n\
+          \  ### Collectors\n  - manageCollectors\n  - viewCollectors\n  ### Dashboards\n\
+          \  - shareDashboardWhitelist\n  - shareDashboardWorld\n  ### Data Management\n\
+          \  - manageContent\n  - manageDataVolumeFeed\n  - manageFieldExtractionRules\n\
+          \  - manageIndexes\n  - manageS3DataForwarding\n  ### Metrics\n  - manageMonitors\n\
+          \  - metricsExtraction\n  ### Security\n  - ipWhitelisting\n  - manageAccessKeys\n\
+          \  - manageAuditDataFeed\n  - managePasswordPolicy\n  - manageSaml\n  -\
+          \ manageSupportAccountAccess\n  - manageUsersAndRoles\n  - shareDashboardOutsideOrg\n"
+        items:
+          type: "string"
+  ListUsersResponse:
+    type: "object"
+    required:
+    - "data"
+    properties:
+      data:
+        type: "array"
+        description: "List of users."
+        items:
+          $ref: "#/definitions/User"
+      next:
+        type: "string"
+        description: "Next continuation token."
+  User:
+    allOf:
+    - required:
+      - "id"
+      properties:
+        id:
+          type: "string"
+          description: "Unique identifier for the user."
+        isActive:
+          type: "boolean"
+          description: "Is the user active."
+        isLocked:
+          type: "boolean"
+          description: "Is the user locked."
+        lastLoginTimestamp:
+          type: "string"
+          format: "dateTime"
+          description: "Timestamp of the last login for the user in UTC. Set to null\
+            \ if the user has never logged in."
+    - $ref: "#/definitions/CreateUserDefinition"
+    - $ref: "#/definitions/Metadata"
+  CreateUserDefinition:
+    type: "object"
+    required:
+    - "email"
+    - "firstName"
+    - "lastName"
+    - "roleIds"
+    properties:
+      firstName:
+        type: "string"
+        example: "John"
+        description: "First name of the user."
+        minLength: 1
+        maxLength: 128
+      lastName:
+        type: "string"
+        example: "Doe"
+        description: "Last name of the user."
+        minLength: 0
+        maxLength: 128
+      email:
+        type: "string"
+        format: "email"
+        example: "johndoe@acme.com"
+        description: "Email address of the user."
+        maxLength: 255
+      roleIds:
+        type: "array"
+        description: "List of roleIds associated with the user."
+        items:
+          type: "string"
+  UpdateUserDefinition:
+    type: "object"
+    required:
+    - "firstName"
+    - "isActive"
+    - "lastName"
+    - "roleIds"
+    properties:
+      firstName:
+        type: "string"
+        example: "John"
+        description: "First name of the user."
+        minLength: 1
+        maxLength: 128
+      lastName:
+        type: "string"
+        example: "Doe"
+        description: "Last name of the user."
+        minLength: 0
+        maxLength: 128
+      isActive:
+        type: "boolean"
+        description: "Is the user active."
+      roleIds:
+        type: "array"
+        description: "List of roleIds associated with the user."
+        items:
+          type: "string"
+  ChangeEmailRequest:
+    type: "object"
+    required:
+    - "email"
+    properties:
+      email:
+        type: "string"
+        format: "email"
+        example: "johndoe@acme.com"
+        description: "New email address of the user"
+        maxLength: 255
+  Metadata:
+    type: "object"
+    required:
+    - "createdAt"
+    - "createdBy"
+    - "modifiedAt"
+    - "modifiedBy"
+    properties:
+      createdAt:
+        type: "string"
+        format: "dateTime"
+        description: "Creation timestamp in UTC in [RFC3339](https://tools.ietf.org/html/rfc3339)\
+          \ format.\n"
+      createdBy:
+        type: "string"
+        description: "Identifier of the user who created the resource."
+      modifiedAt:
+        type: "string"
+        format: "dateTime"
+        description: "Last modification timestamp in UTC."
+      modifiedBy:
+        type: "string"
+        description: "Identifier of the user who last modified the resource."
